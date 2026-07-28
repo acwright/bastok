@@ -1,0 +1,56 @@
+{
+  "name": "bastok",
+  "version": "1.0.0",
+  "description": "Convert BASIC ASCII text to tokenized binaries (.prg/.bas) and back for the 6502 BIOS BASIC",
+  "main": "dist/Bastok/Bastok.js",
+  "types": "dist/Bastok/Bastok.d.ts",
+  "bin": {
+    "bastok": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "!dist/test",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "npx tsc",
+    "start": "node ./dist/index.js",
+    "test": "npm run build && node --test dist/test/*.test.js",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "6502",
+    "BASIC",
+    "tokenizer",
+    "detokenizer",
+    "petcat",
+    "prg",
+    "homebrew",
+    "retrocomputing",
+    "typescript"
+  ],
+  "author": "A.C. Wright",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/acwright/bastok.git"
+  },
+  "homepage": "https://github.com/acwright/bastok",
+  "bugs": {
+    "url": "https://github.com/acwright/bastok/issues"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "type": "commonjs",
+  "dependencies": {
+    "commander": "^14.0.1",
+    "figlet": "^1.9.3"
+  },
+  "devDependencies": {
+    "@types/figlet": "^1.7.0",
+    "@types/node": "^24.7.0",
+    "typescript": "^7.0.2"
+  }
+}
