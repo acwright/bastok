@@ -277,6 +277,14 @@ const { buffer, warnings } = bastok.tokenize('10 PRINT "HELLO"\n')
 const { text } = bastok.detokenize(buffer)
 ```
 
+## Related
+
+- [6502-ACE](https://github.com/acwright/6502-ACE) — the hardware, and the index of the whole family
+- [6502-BIOS](https://github.com/acwright/6502-BIOS) — the BASIC dialect this tokenizes for
+- [6502-BAS](https://github.com/acwright/6502-BAS) — BASIC listings built with this tool
+- [6502-EMULATOR](https://github.com/acwright/6502-EMULATOR) — run a tokenized `.prg` without hardware
+- [cffs](https://github.com/acwright/cffs) — package the result onto a CompactFlash image
+
 ## License
 
 MIT: [https://github.com/acwright/bastok/blob/main/LICENSE](https://github.com/acwright/bastok/blob/main/LICENSE)
