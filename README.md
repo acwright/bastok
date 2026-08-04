@@ -16,6 +16,9 @@ the result straight onto a CompactFlash card or send it over XMODEM.
 
 Inspired by the `petcat` utility distributed with the VICE emulator.
 
+> 📖 **Guide:** [AC6502 Documentation](https://acwright.github.io/6502-DOCS/) — the user's and programmer's guide for the whole family.
+> See [the tool belt](https://acwright.github.io/6502-DOCS/crossdev/tools) and [BASIC in a cross-dev workflow](https://acwright.github.io/6502-DOCS/crossdev/basic).
+
 ## Installation
 
 ### From NPM
@@ -284,6 +287,7 @@ const { text } = bastok.detokenize(buffer)
 - [6502-BAS](https://github.com/acwright/6502-BAS) — BASIC listings built with this tool
 - [6502-EMULATOR](https://github.com/acwright/6502-EMULATOR) — run a tokenized `.prg` without hardware
 - [cffs](https://github.com/acwright/cffs) — package the result onto a CompactFlash image
+- [6502-DOCS](https://github.com/acwright/6502-DOCS) — the documentation site: [where this tool fits in a cross-dev workflow](https://acwright.github.io/6502-DOCS/crossdev/tools)
 
 ## License
 
