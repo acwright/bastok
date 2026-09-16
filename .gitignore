@@ -34,3 +34,8 @@ logs/
 
 # Optional: misc
 *.tgz
+
+# Planning documents are kept local
+VDP-ASSESSMENT.md
+VDP-PLAN.md
+/PLAN.md
