@@ -1,11 +1,14 @@
 #! /usr/bin/env node
 
 import * as fs from 'fs'
+import * as path from 'path'
 import figlet from 'figlet'
 import { Command, InvalidArgumentError } from 'commander'
 import { Bastok, BastokError, Mode } from './Bastok/Bastok'
 
-const VERSION = '1.0.0'
+const VERSION: string = JSON.parse(
+  fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8')
+).version
 
 const bastok = new Bastok()
 
@@ -31,7 +34,7 @@ program
   .name('bastok')
   .description(
     'A utility for converting BASIC source text to tokenized program images\n' +
-    '(.prg / .bas) for the 6502 homebrew BIOS, and back again.'
+    '(.prg / .bas) for the AC6502 BIOS, and back again.'
   )
   .version(VERSION, '-v, --version', 'Output the current version')
   .helpOption('-h, --help', 'Output help / options')

@@ -10,8 +10,9 @@ bastok
 ```
 
 A Node.js-based utility for converting BASIC source text to tokenized program
-images (`.prg` / `.bas`) for the [6502 homebrew BIOS](https://github.com/acwright/6502-BIOS),
-and back again. Write your BASIC on a real keyboard, tokenize it here, and drop
+images (`.prg` / `.bas`) for the [AC6502 BIOS](https://github.com/acwright/6502-BIOS),
+and back again. It knows both BASIC keyword tables: BIOS 1.x (1.6 and earlier) and
+BIOS 2.x. Write your BASIC on a real keyboard, tokenize it here, and drop
 the result straight onto a CompactFlash card or send it over XMODEM.
 
 Inspired by the `petcat` utility distributed with the VICE emulator.
@@ -85,6 +86,33 @@ Writes `game.txt`. To list to the terminal instead:
 bastok -o - game.prg
 ```
 
+### Choosing the BIOS
+
+BIOS 2.x added keywords to BASIC, so the same text can crunch to different bytes
+on 1.x and 2.x. `-b` / `--bios` says which BIOS the program is for:
+
+- `--bios 1` (the default) — BIOS 1.x, such as 1.6 on the COB, DEV, KIM, VCS,
+  PicoCalc and an ACE with the TMS9918A. It's also what the emulator runs by
+  default (`6502 run`, `--vdp tms9918a`).
+- `--bios 2` — BIOS 2.x, on an ACE with the 6502-PICOVDP
+  (`6502 run --vdp picovdp`).
+
+```
+bastok -b 2 game.txt              # tokenize for BIOS 2.x
+bastok -b 2 -o - game.prg         # list a BIOS 2.x program
+bastok -T -b 2                    # show the BIOS 2.x token table
+```
+
+The option picks the keyword table in both directions and for `--tokens`. bastok
+doesn't guess the BIOS from the file, but it does warn (on stderr; `-q` silences
+it) when a choice looks wrong:
+
+- tokenizing with `--bios 1`, a line that would crunch to 2.x keywords (`VPOKE`,
+  `SCREEN`, ...) on BIOS 2.x;
+- tokenizing with `--bios 2`, a line that says `BRK`, which isn't a keyword on 2.x;
+- listing with `--bios 1`, token bytes `$D5`–`$E3`, which only 2.x has;
+- listing with `--bios 2`, a bare `SCREEN`, which was `BRK` if the program came from 1.x.
+
 ### Command Line Options
 
 - `-v, --version` — Output the current version
@@ -96,7 +124,8 @@ bastok -o - game.prg
 - `-H, --header` — Read / write a 2-byte load address header
 - `-c, --crlf` — Emit CRLF line endings when detokenizing
 - `-q, --quiet` — Suppress warnings and the summary line
-- `-T, --tokens` — Print the token table and exit
+- `-b, --bios <1|2>` — BIOS the image is for: `1` (1.x, e.g. 1.6) or `2` (2.x) (default: `1`)
+- `-T, --tokens` — Print the token table (for `--bios`) and exit
 
 Warnings and the "wrote N bytes" summary go to stderr, so `-o -` stays pipe-safe.
 
@@ -154,8 +183,12 @@ header wins over `-a`.
 
 ## Tokens
 
-85 keywords, `$80`–`$D4`, transcribed from `KeywordTbl` in `BASIC.asm`. Run
-`bastok --tokens` for the full list.
+Transcribed from `KeywordTbl` in `BASIC.asm`. Run `bastok --tokens` (or
+`bastok -T -b 2`) for the full list.
+
+### BIOS 1.x
+
+85 keywords, `$80`–`$D4`:
 
 | | | | | |
 |---|---|---|---|---|
@@ -177,11 +210,36 @@ header wins over `-a`.
 | `$CB` MID$ | `$CC` JOY | `$CD` INKEY | `$CE` HEX | `$CF` MIN |
 | `$D0` MAX | `$D1` DISK | `$D2` BLOAD | `$D3` BSAVE | `$D4` FORMAT |
 
+### BIOS 2.x
+
+100 keywords, `$80`–`$E3`: the 1.x table, except that `$B4` is `SCREEN` instead of
+`BRK`, plus fifteen more:
+
+| | | | | |
+|---|---|---|---|---|
+| `$D5` VPOKE | `$D6` VREG | `$D7` PALETTE | `$D8` VSYNC | `$D9` VLOAD |
+| `$DA` SPRITE | `$DB` SCROLL | `$DC` LAYER | `$DD` NVSAVE | `$DE` NVLOAD |
+| `$DF` NVERASE | `$E0` VPEEK | `$E1` VSTAT | `$E2` NVSTAT | `$E3` NVFIND |
+
+### Moving a program between 1.x and 2.x
+
+- **A 1.x image loads on 2.x unchanged, except for `$B4`**: `BRK` lists as `SCREEN`,
+  and a bare `SCREEN` is `?SYNTAX ERROR` on 2.x.
+- **`BRK` in 2.x source is just letters** (a variable name), not a keyword.
+- **Names that start with a 2.x keyword crunch differently.** `XVLOAD=1` is
+  `X` `V` `LOAD` `=1` on 1.x but `X` `VLOAD` `=1` on 2.x, and `ONSCREEN` is `ON`
+  `SCREEN` on 2.x. Watch for names containing `SCREEN`, `SCROLL`, `SPRITE`,
+  `LAYER`, `PALETTE`, `VPOKE`, `VPEEK`, `VREG`, `VSYNC`, `VLOAD`, `VSTAT`, or
+  `NV` followed by `SAVE`, `LOAD`, `ERASE`, `STAT` or `FIND`.
+- **A 2.x image listed as 1.x** shows `{$D5}` and so on for the new keywords, and
+  won't tokenize back. List it with `--bios 2`.
+
 ## Tokenizer Behaviour
 
 `bastok` is a port of `BasCrunch` / `BasMatchKeyword` / `BasStoreLine` from
 `BASIC.asm`, and reproduces what the interpreter does rather than improving on
-it. Typing your source in by hand gives the same bytes.
+it. Typing your source in by hand gives the same bytes; the tests check that
+against both ROMs (see [Checking against the ROMs](#checking-against-the-roms)).
 
 - **Case is folded** to uppercase outside of quoted strings. Text inside quotes,
   and everything after `REM`, is kept exactly as written.
@@ -190,8 +248,8 @@ it. Typing your source in by hand gives the same bytes.
   as `FOR` (`$81`) followed by the letters `MAT`. BIOS 1.0–1.3 took the first
   match (so `FORMAT` couldn't be typed there); `bastok` follows 1.4 and later.
 - **Keywords inside identifiers are tokenized.** `TOTAL=1` becomes `TO` (`$9C`)
-  plus `TAL=1`, the classic MS BASIC hazard. Avoid variable names that contain
-  keywords.
+  plus `TAL=1`, the classic MS BASIC hazard, even with longest match. Avoid
+  variable names that contain keywords.
 - **Spaces are preserved** as typed — this BASIC does not squeeze them out.
 - **Lines are stored in numeric order** regardless of their order in the file.
   A repeated line number replaces the earlier line, and a bare line number with
@@ -236,9 +294,36 @@ node ./dist/index.js examples/guess.txt
 npm test
 ```
 
-### Release Build
+The tests need only Node. They include `src/test/rom.test.ts`, which compares
+bastok with what the ROMs themselves crunched (next section).
+
+### Checking against the ROMs
+
+`src/test/fixtures/rom-crunch.json` records what BIOS 1.6 and 2.0 do with each
+program in `src/test/corpus/`: the bytes from `$0800` to `VARTAB` (what `SAVE`
+writes) and the output of `LIST`. It is captured by typing the programs into the
+emulator:
 
 ```
+npm run capture:rom              # re-capture and write the file
+npm run capture:rom -- --check   # re-capture and fail on any difference
+```
+
+This needs [6502 Emulator](https://github.com/acwright/6502-EMULATOR) 3.1.0
+installed (the `6502` command). The script boots its bundled `BIOS.bin` (1.6, on the
+TMS9918A) and `BIOS2.bin` (2.0, on the PICOVDP) headless, refuses any other
+emulator version or ROM hash, and also checks that `KeywordTbl` in each running
+ROM equals `tokens-1.6.json` / `tokens-2.0.json`. `--rom1`, `--rom2` and `--port`
+override the ROM files and the debug port.
+
+### Release Build
+
+The version lives only in `package.json` (and `package-lock.json`); the CLI reads it
+from there.
+
+```
+npm version X.Y.Z --no-git-tag-version
+git commit -am "Release vX.Y.Z"
 git tag vX.Y.Z
 git push origin main --tags
 npm publish
@@ -254,9 +339,13 @@ bastok/
 │   │   ├── Bastok.ts           # File-level facade, direction detection
 │   │   ├── Tokenizer.ts        # Text -> program image (port of BasCrunch)
 │   │   ├── Detokenizer.ts      # Program image -> text (port of BasCmdList)
-│   │   ├── Tokens.ts           # Keyword table, transcribed from BASIC.asm
+│   │   ├── Tokens.ts           # Keyword tables (1.x and 2.x), from BASIC.asm
 │   │   └── Errors.ts           # BastokError
-│   └── test/                   # Round-trip and behaviour tests
+│   └── test/                   # Behaviour, table, CLI and ROM tests
+│       ├── corpus/             # Programs typed into the ROMs
+│       └── fixtures/           # Pinned token tables, ROM captures
+├── scripts/
+│   └── capture-rom.mjs         # npm run capture:rom
 ├── examples/                   # Sample BASIC programs
 ├── dist/                       # Compiled JavaScript
 ├── package.json
@@ -266,10 +355,20 @@ bastok/
 
 ### Keeping in sync with the BIOS
 
-`src/Bastok/Tokens.ts` mirrors `KeywordTbl` and the `TOK_xxx` equates in
-`6502-BIOS/BASIC.asm`. If keywords are added, removed or reordered there, update
-the `KEYWORDS` array here to match — order determines both the token values and
-the matching behaviour.
+`src/Bastok/Tokens.ts` mirrors `KeywordTbl` in `6502-BIOS/BASIC.asm`, twice:
+
+- `KEYWORDS_1` is the table on 6502-BIOS branch `v1.x`, final at tag `v1.6` (the
+  last 1.x release). `src/test/fixtures/tokens-1.6.json` pins it; it was decoded
+  once from `v1.6`'s `BIOS.bin`. (`KEYWORDS` and `TOK_MAX` are the 1.x values,
+  as in bastok 1.0.)
+- `KEYWORDS_2` is the table on `main`, at tag `v2.0`.
+  `src/test/fixtures/tokens-2.0.json` is a copy of the BIOS's own
+  `tests/fixtures/tokens.json` at `v2.0`.
+
+Order determines the token values. If a later 2.x BIOS adds keywords: copy its
+`tests/fixtures/tokens.json` over `tokens-2.0.json` (and update the hash in
+`src/test/tokens.test.ts`), update `KEYWORDS_2`, add the new keywords to the
+corpus, and run `npm run capture:rom` against that ROM.
 
 ## Library Use
 
@@ -277,9 +376,14 @@ the matching behaviour.
 import { Bastok } from 'bastok'
 
 const bastok = new Bastok()
-const { buffer, warnings } = bastok.tokenize('10 PRINT "HELLO"\n')
+bastok.bios = 2                 // BIOS 2.x; the default is 1
+const { buffer, warnings } = bastok.tokenize('10 VPOKE 0,65\n')
 const { text } = bastok.detokenize(buffer)
 ```
+
+`Tokenizer` and `Detokenizer` take the same `bios` property, and `Tokens`
+exports `KEYWORDS_1`, `KEYWORDS_2`, `keywordsFor(bios)`, `tokenMax(bios)` and
+`keywordForToken(token, bios)`.
 
 ## Related
 

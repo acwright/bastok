@@ -1,7 +1,7 @@
 {
   "name": "bastok",
   "version": "1.0.0",
-  "description": "Convert BASIC ASCII text to tokenized binaries (.prg/.bas) and back for the 6502 BIOS BASIC",
+  "description": "Convert BASIC ASCII text to tokenized binaries (.prg/.bas) and back for the AC6502 BIOS's BASIC",
   "main": "dist/Bastok/Bastok.js",
   "types": "dist/Bastok/Bastok.d.ts",
   "bin": {
