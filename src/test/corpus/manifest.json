@@ -1,0 +1,6 @@
+{
+  "common-guess": { "bios": [1, 2] },
+  "common-keywords-1": { "bios": [1, 2] },
+  "v1-brk": { "bios": [1, 2] },
+  "v2-keywords": { "bios": [1, 2] }
+}
