@@ -10,8 +10,12 @@
 /** First token byte. Keywords are numbered sequentially from here. */
 export const TOK_BASE = 0x80
 
-/** Keywords in table order. KEEP IN SYNC WITH BASIC.asm. */
-export const KEYWORDS: readonly string[] = [
+/**
+ * BIOS 1.x keywords in table order: KeywordTbl at 6502-BIOS tag v1.6, the
+ * last 1.x release, so this table is final. Pinned by
+ * src/test/fixtures/tokens-1.6.json.
+ */
+export const KEYWORDS_1: readonly string[] = [
   // Statements
   'END',      // $80
   'FOR',      // $81
@@ -101,15 +105,18 @@ export const KEYWORDS: readonly string[] = [
   'FORMAT',   // $D4
 ]
 
-/** Highest valid token byte. */
-export const TOK_MAX = TOK_BASE + KEYWORDS.length - 1
+/** The BIOS 1.x table, under its 1.0.0 name. */
+export const KEYWORDS: readonly string[] = KEYWORDS_1
+
+/** Highest valid BIOS 1.x token byte ($D4). */
+export const TOK_MAX = TOK_BASE + KEYWORDS_1.length - 1
 
 /** REM ($8E) — everything after it on a line is copied verbatim. */
-export const TOK_REM = TOK_BASE + KEYWORDS.indexOf('REM')
+export const TOK_REM = TOK_BASE + KEYWORDS_1.indexOf('REM')
 
 /** Keyword text for a token byte, or undefined if the byte is not a token. */
 export function keywordForToken(token: number): string | undefined {
-  return KEYWORDS[token - TOK_BASE]
+  return KEYWORDS_1[token - TOK_BASE]
 }
 
 /** Default program load address (PROGRAM_START in BIOS.inc). */
