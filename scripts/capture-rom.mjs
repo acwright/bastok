@@ -8,12 +8,13 @@
 // bundled BIOS.bin / BIOS2.bin), --port <n> (debug port for BIOS 1; BIOS 2 uses
 // n+1; default: free ports the OS picks).
 //
-// Needs 6502 Emulator 3.1.0 installed (the `6502` command). For each BIOS it
+// Needs AC6502 Emulator 3.1.1 installed (the `6502` command). For each BIOS it
 // boots a headless machine with the debug server on, and for each corpus
 // program it types NEW, then every line followed by PRINT 12345+1, waiting for
-// " 12346" before the next line. That paces typing to the crunch without flow
-// control, which BIOS 1.6 cannot use. Then it reads VARTAB ($035F) and
-// $0800..VARTAB-1 (the image SAVE would write) and the output of LIST.
+// " 12346" before the next line. That paces typing to the crunch, so the
+// capture never leans on serial flow control either way. Then it reads VARTAB
+// ($035F) and $0800..VARTAB-1 (the image SAVE would write) and the output of
+// LIST.
 //
 // It also decodes KeywordTbl from the running ROM and requires it to equal
 // src/test/fixtures/tokens-1.6.json / tokens-2.0.json byte for byte.
@@ -34,7 +35,7 @@ const CORPUS = path.join(ROOT, 'src', 'test', 'corpus')
 const FIXTURES = path.join(ROOT, 'src', 'test', 'fixtures')
 const OUTPUT = path.join(FIXTURES, 'rom-crunch.json')
 
-const EMULATOR_VERSION = '3.1.0'
+const EMULATOR_VERSION = '3.1.1'
 const PROGRAM_START = 0x0800
 const VARTAB = 0x035f
 
@@ -43,15 +44,15 @@ const BIOSES = {
     bios: 'v1.6',
     vdp: 'tms9918a',
     romName: 'BIOS.bin',
-    sha256: 'fc0002d0ae25240ed36cfa4bea12735ee71fb05017651bf726520af0658be0a0',
+    sha256: '4b4154afac681e26324d3f5a845e41770d977c05db1ef6516c9d2c5e210d8c56',
     banner: /6502 BIOS v1\.6/,
     tokens: 'tokens-1.6.json',
   },
   2: {
-    bios: 'v2.0',
+    bios: 'v2.0.1',
     vdp: 'picovdp',
     romName: 'BIOS2.bin',
-    sha256: '4702fad7d7232b687901d3697eb2450dadcfcc6cd0ee4a8bc6d52f46bba7f8e4',
+    sha256: 'f5fb454b9f407c9cbb4cb349ac833b7c92400122d44b6a5840ebe6ab9cf0d97b',
     banner: /AC6502 BIOS v2\.0/,
     tokens: 'tokens-2.0.json',
   },
@@ -89,13 +90,13 @@ function emulatorResources() {
     const match = fs.readFileSync(fs.realpathSync(shim), 'latin1').match(/"([^"]*?\.app)\/Contents\//)
     if (match) { return path.join(match[1], 'Contents', 'Resources') }
   }
-  return '/Applications/6502 Emulator.app/Contents/Resources'
+  return '/Applications/AC6502 Emulator.app/Contents/Resources'
 }
 
 function checkEmulator() {
   const result = spawnSync('6502', ['--version'], { encoding: 'utf8' })
   if (result.error || result.status !== 0) {
-    fail(`the 6502 command is not installed; install 6502 Emulator ${EMULATOR_VERSION}`)
+    fail(`the 6502 command is not installed; install AC6502 Emulator ${EMULATOR_VERSION}`)
   }
   const version = result.stdout.trim()
   if (version !== EMULATOR_VERSION) {

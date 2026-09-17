@@ -1,13 +1,13 @@
 {
-  "emulator": "3.1.0",
+  "emulator": "3.1.1",
   "roms": {
     "1": {
       "bios": "v1.6",
-      "sha256": "fc0002d0ae25240ed36cfa4bea12735ee71fb05017651bf726520af0658be0a0"
+      "sha256": "4b4154afac681e26324d3f5a845e41770d977c05db1ef6516c9d2c5e210d8c56"
     },
     "2": {
-      "bios": "v2.0",
-      "sha256": "4702fad7d7232b687901d3697eb2450dadcfcc6cd0ee4a8bc6d52f46bba7f8e4"
+      "bios": "v2.0.1",
+      "sha256": "f5fb454b9f407c9cbb4cb349ac833b7c92400122d44b6a5840ebe6ab9cf0d97b"
     }
   },
   "programs": {

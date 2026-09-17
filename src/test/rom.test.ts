@@ -1,8 +1,8 @@
 // bastok against the ROMs' own crunch.
 //
 // src/test/fixtures/rom-crunch.json is what `npm run capture:rom` recorded by
-// typing each program in src/test/corpus into BIOS v1.6 and v2.0 on 6502
-// Emulator 3.1.0: the bytes from $0800 to VARTAB (what SAVE writes) and the
+// typing each program in src/test/corpus into BIOS v1.6 and v2.0.1 on AC6502
+// Emulator 3.1.1: the bytes from $0800 to VARTAB (what SAVE writes) and the
 // output of LIST. These tests need no emulator; `npm run capture:rom -- --check`
 // re-captures and proves the file is still what the ROMs do.
 
@@ -34,11 +34,11 @@ function bastokFor(bios: Bios): Bastok {
   return bastok
 }
 
-test('the capture is from BIOS v1.6 and v2.0 on emulator 3.1.0', () => {
-  assert.equal(capture.emulator, '3.1.0')
+test('the capture is from BIOS v1.6 and v2.0.1 on emulator 3.1.1', () => {
+  assert.equal(capture.emulator, '3.1.1')
   assert.deepEqual(capture.roms, {
-    1: { bios: 'v1.6', sha256: 'fc0002d0ae25240ed36cfa4bea12735ee71fb05017651bf726520af0658be0a0' },
-    2: { bios: 'v2.0', sha256: '4702fad7d7232b687901d3697eb2450dadcfcc6cd0ee4a8bc6d52f46bba7f8e4' },
+    1: { bios: 'v1.6', sha256: '4b4154afac681e26324d3f5a845e41770d977c05db1ef6516c9d2c5e210d8c56' },
+    2: { bios: 'v2.0.1', sha256: 'f5fb454b9f407c9cbb4cb349ac833b7c92400122d44b6a5840ebe6ab9cf0d97b' },
   })
 })
 
@@ -72,7 +72,7 @@ for (const [name, captures] of Object.entries(capture.programs)) {
   }
 }
 
-test('examples/guess.prg is the image BIOS 1.6 and 2.0 store for guess.txt', () => {
+test('examples/guess.prg is the image BIOS 1.6 and 2.0.1 store for guess.txt', () => {
   const prg = fs.readFileSync(path.join(ROOT, 'examples', 'guess.prg')).toString('hex')
   assert.equal(capture.programs['common-guess']['1'].image, prg)
   assert.equal(capture.programs['common-guess']['2'].image, prg)

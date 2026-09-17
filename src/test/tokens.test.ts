@@ -1,20 +1,23 @@
 // The token tables, pinned to the BIOS they mirror.
 //
 // tokens-1.6.json: KeywordTbl decoded from 6502-BIOS tag v1.6
-//   (commit 71e1e66560cf08635812b062a038c14381dd8f69), BIOS.bin sha256
-//   fc0002d0ae25240ed36cfa4bea12735ee71fb05017651bf726520af0658be0a0 (the same
-//   file as 6502 Emulator 3.1.0's assets/roms/BIOS.bin). Method: find the table
-//   by its first bytes "EN" $C4 "FO" $D2 (END, FOR), then read keywords up to the
-//   $00 terminator, bit 7 ending each one; keys "$80".. in order, JSON with a
-//   two-space indent and a trailing newline. The same decode of v2.0's BIOS.bin
-//   reproduces v2.0's tests/fixtures/tokens.json byte for byte. Generated once;
-//   never regenerate it from Tokens.ts.
+//   (commit 8acb4fc1d410f523a0ba64308ac1c1d9e22098a2), BIOS.bin sha256
+//   4b4154afac681e26324d3f5a845e41770d977c05db1ef6516c9d2c5e210d8c56. Method:
+//   find the table by its first bytes "EN" $C4 "FO" $D2 (END, FOR), then read
+//   keywords up to the $00 terminator, bit 7 ending each one; keys "$80".. in
+//   order, JSON with a two-space indent and a trailing newline. The same decode
+//   of v2.0.1's BIOS.bin reproduces v2.0.1's tests/fixtures/tokens.json byte for
+//   byte. Generated once; never regenerate it from Tokens.ts.
 //
-// tokens-2.0.json: a byte-identical copy of 6502-BIOS v2.0:tests/fixtures/tokens.json
-//   (commit b185e37ccefcfc2be872ee3a59950d7ee9830bf9), sha256
+// tokens-2.0.json: a byte-identical copy of 6502-BIOS v2.0.1:tests/fixtures/tokens.json
+//   (commit 62254c130955caa76af08d2f9bf29abf3adde980), sha256
 //   d7e569a6a0bbf8d31d0de38d94c5003e358258b1554e445e5aca7e6b688add61. Its
-//   BIOS.bin (sha256 4702fad7d7232b687901d3697eb2450dadcfcc6cd0ee4a8bc6d52f46bba7f8e4)
-//   is emulator 3.1.0's assets/roms/BIOS2.bin.
+//   BIOS.bin has sha256
+//   f5fb454b9f407c9cbb4cb349ac833b7c92400122d44b6a5840ebe6ab9cf0d97b.
+//
+// Both tags were reissued for the serial flow-control fixes, which touch only
+// Kernal.asm: BASIC.asm and so KeywordTbl are unchanged, and the name stays
+// tokens-2.0.json because the 2.x table is still BIOS 2.0's.
 
 import { strict as assert } from 'assert'
 import { createHash } from 'crypto'
