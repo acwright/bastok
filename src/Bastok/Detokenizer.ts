@@ -1,5 +1,5 @@
 import { BastokError } from './Errors'
-import { PROGRAM_START, TOK_BASE, keywordForToken } from './Tokens'
+import { Bios, PROGRAM_START, TOK_BASE, keywordForToken } from './Tokens'
 
 export interface DetokenizeResult {
   /** The listing, one line per program line. */
@@ -24,6 +24,9 @@ export class Detokenizer {
 
   /** Load address the image is linked for; only used to check next-pointers. */
   address: number = PROGRAM_START
+
+  /** BIOS whose keyword table is used: 1 (1.x) or 2 (2.x). */
+  bios: Bios = 1
 
   /** Line ending for the emitted listing. */
   eol: string = '\n'
@@ -100,7 +103,7 @@ export class Detokenizer {
         out += String.fromCharCode(byte)
         continue
       }
-      const keyword = keywordForToken(byte)
+      const keyword = keywordForToken(byte, this.bios)
       if (keyword === undefined) {
         out += `{$${this.hex(byte)}}`
         warnings.push(

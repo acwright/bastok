@@ -4,7 +4,7 @@ import * as path from 'path'
 import { BastokError } from './Errors'
 import { Detokenizer, DetokenizeResult } from './Detokenizer'
 import { Tokenizer, TokenizeResult } from './Tokenizer'
-import { KEYWORDS, PROGRAM_START, TOK_BASE } from './Tokens'
+import { Bios, PROGRAM_START, TOK_BASE, keywordsFor } from './Tokens'
 
 export type Mode = 'tokenize' | 'detokenize'
 
@@ -33,6 +33,9 @@ export class Bastok {
   /** Line ending used when emitting a listing. */
   eol: string = '\n'
 
+  /** BIOS whose keyword table is used: 1 (1.x, e.g. 1.6) or 2 (2.x). */
+  bios: Bios = 1
+
   // ---------------------------------------------------------------------------
   //   T O K E N I Z E
   // ---------------------------------------------------------------------------
@@ -41,6 +44,7 @@ export class Bastok {
   tokenize(text: string): TokenizeResult {
     const tokenizer = new Tokenizer()
     tokenizer.address = this.address
+    tokenizer.bios = this.bios
 
     const result = tokenizer.tokenize(text)
     if (!this.header) { return result }
@@ -74,6 +78,7 @@ export class Bastok {
     const detokenizer = new Detokenizer()
     detokenizer.address = this.address
     detokenizer.eol = this.eol
+    detokenizer.bios = this.bios
 
     return detokenizer.detokenize(image)
   }
@@ -114,9 +119,9 @@ export class Bastok {
     return candidate === file ? base + '.out' + extension : candidate
   }
 
-  /** The token table, formatted for display. */
+  /** The token table for the chosen BIOS, formatted for display. */
   tokenTable(): string {
-    return KEYWORDS
+    return keywordsFor(this.bios)
       .map((keyword, index) => {
         const token = (TOK_BASE + index).toString(16).toUpperCase()
         return `$${token}  ${keyword}`

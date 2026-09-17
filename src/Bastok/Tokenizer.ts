@@ -1,7 +1,7 @@
 import { BastokError } from './Errors'
 import {
+  Bios,
   ILLEGAL_CHARS,
-  KEYWORDS,
   LINBUF_MAX,
   LINENUM_MAX,
   PROGRAM_LIMIT,
@@ -9,6 +9,7 @@ import {
   TOKBUF_MAX,
   TOK_BASE,
   TOK_REM,
+  keywordsFor,
 } from './Tokens'
 
 /** A stored program line: number plus its tokenized payload (no terminator). */
@@ -36,6 +37,9 @@ export class Tokenizer {
 
   /** Load address the program image is linked for. */
   address: number = PROGRAM_START
+
+  /** BIOS whose keyword table is used: 1 (1.x) or 2 (2.x). */
+  bios: Bios = 1
 
   tokenize(text: string): TokenizeResult {
     const warnings: string[] = []
@@ -186,9 +190,10 @@ export class Tokenizer {
    * it is only the start of a longer name, so "TOTAL" is TO ($9C) plus TAL.
    */
   private matchKeyword(raw: string, x: number): { token: number, next: number } | null {
+    const keywords = keywordsFor(this.bios)
     let best: { token: number, next: number } | null = null
-    for (let index = 0; index < KEYWORDS.length; index++) {
-      const keyword = KEYWORDS[index]
+    for (let index = 0; index < keywords.length; index++) {
+      const keyword = keywords[index]
       if (best !== null && keyword.length <= best.next - x) { continue }
       let matched = true
       for (let i = 0; i < keyword.length; i++) {
