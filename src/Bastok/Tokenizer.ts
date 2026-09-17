@@ -29,8 +29,8 @@ export interface TokenizeResult {
  *
  * This is a port of BasProcessLine / BasCrunch / BasMatchKeyword / BasStoreLine
  * from 6502-BIOS/BASIC.asm, and deliberately reproduces the interpreter's
- * behaviour rather than improving on it -- including first-match keyword
- * matching, which tokenizes keywords embedded in longer identifiers.
+ * behaviour rather than improving on it -- including longest-match keyword
+ * matching that still tokenizes keywords embedded in longer identifiers.
  */
 export class Tokenizer {
 
@@ -180,14 +180,16 @@ export class Tokenizer {
   }
 
   /**
-   * BasMatchKeyword: walk the keyword table in order and take the FIRST
-   * keyword that matches at raw[x]. This is not longest-match -- "FORMAT"
-   * matches FOR ($81) followed by the letters MAT, exactly as the interpreter
-   * does it.
+   * BasMatchKeyword: walk the whole keyword table and take the LONGEST keyword
+   * that matches at raw[x], as BIOS 1.4 and later do. "FORMAT" is FORMAT ($D4),
+   * not FOR ($81) followed by the letters MAT. A keyword is still matched when
+   * it is only the start of a longer name, so "TOTAL" is TO ($9C) plus TAL.
    */
   private matchKeyword(raw: string, x: number): { token: number, next: number } | null {
+    let best: { token: number, next: number } | null = null
     for (let index = 0; index < KEYWORDS.length; index++) {
       const keyword = KEYWORDS[index]
+      if (best !== null && keyword.length <= best.next - x) { continue }
       let matched = true
       for (let i = 0; i < keyword.length; i++) {
         const char = raw[x + i]
@@ -196,10 +198,10 @@ export class Tokenizer {
         if (upper !== keyword[i]) { matched = false; break }
       }
       if (matched) {
-        return { token: TOK_BASE + index, next: x + keyword.length }
+        best = { token: TOK_BASE + index, next: x + keyword.length }
       }
     }
-    return null
+    return best
   }
 
   /**

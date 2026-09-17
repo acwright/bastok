@@ -185,9 +185,10 @@ it. Typing your source in by hand gives the same bytes.
 
 - **Case is folded** to uppercase outside of quoted strings. Text inside quotes,
   and everything after `REM`, is kept exactly as written.
-- **Keywords match first, not longest.** The interpreter walks the keyword table
-  in token order and takes the first hit, so `FORMAT` tokenizes as `FOR` (`$81`)
-  followed by the letters `MAT`. Type it into the machine and you get the same.
+- **Keywords match longest, not first.** The interpreter walks the whole keyword
+  table and takes the longest hit, so `FORMAT` tokenizes as `FORMAT` (`$D4`), not
+  as `FOR` (`$81`) followed by the letters `MAT`. BIOS 1.0–1.3 took the first
+  match (so `FORMAT` couldn't be typed there); `bastok` follows 1.4 and later.
 - **Keywords inside identifiers are tokenized.** `TOTAL=1` becomes `TO` (`$9C`)
   plus `TAL=1`, the classic MS BASIC hazard. Avoid variable names that contain
   keywords.

@@ -2,9 +2,9 @@
 //   T O K E N   T A B L E
 //
 //   Transcribed from KeywordTbl in 6502-BIOS/BASIC.asm.  Order is significant:
-//   the token byte is TOK_BASE + (index in this array), and the interpreter's
-//   keyword matcher walks the table in this order taking the FIRST match, so
-//   reordering changes both the token values and the tokenizer's behaviour.
+//   the token byte is TOK_BASE + (index in this array), so reordering changes
+//   the token values. The interpreter's keyword matcher walks the whole table
+//   and takes the LONGEST match (BIOS 1.4 and later).
 // =============================================================================
 
 /** First token byte. Keywords are numbered sequentially from here. */

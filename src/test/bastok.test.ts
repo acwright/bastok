@@ -57,10 +57,21 @@ test('does not tokenize inside strings', () => {
   assert.equal(buffer.indexOf(0x81), -1)
 })
 
-test('matches keywords first-match, not longest-match', () => {
-  // FOR ($81) wins over FORMAT ($D4) because it comes first in KeywordTbl.
+test('matches the longest keyword, as BIOS 1.4 and later do', () => {
+  // FORMAT ($D4) wins over FOR ($81), though FOR comes first in KeywordTbl.
   const buffer = tokenize('10 FORMAT\n')
-  assert.deepEqual([...buffer.subarray(4, 8)], [0x81, 0x4d, 0x41, 0x54])
+  assert.deepEqual([...buffer.subarray(4, buffer.length - 2)], [0xd4, 0x00])
+})
+
+test('a shorter keyword still matches when the longer one does not', () => {
+  // FORJ=1TO3: FOR ($81) J = 1 TO ($9C) 3
+  const buffer = tokenize('10 FORJ=1TO3\n')
+  assert.deepEqual(
+    [...buffer.subarray(4, buffer.length - 2)],
+    [0x81, 0x4a, 0x3d, 0x31, 0x9c, 0x33, 0x00]
+  )
+  // FORMA is FOR plus the letters MA: FORMAT needs all six letters.
+  assert.deepEqual([...tokenize('10 FORMA\n').subarray(4, 8)], [0x81, 0x4d, 0x41, 0x00])
 })
 
 test('tokenizes keywords embedded in identifiers, like the interpreter', () => {
