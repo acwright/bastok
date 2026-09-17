@@ -1,5 +1,5 @@
 import { BastokError } from './Errors'
-import { Bios, PROGRAM_START, TOK_BASE, keywordForToken } from './Tokens'
+import { Bios, PROGRAM_START, TOK_BASE, TOK_BRK_SCREEN, keywordForToken, tokenMax } from './Tokens'
 
 export interface DetokenizeResult {
   /** The listing, one line per program line. */
@@ -31,8 +31,12 @@ export class Detokenizer {
   /** Line ending for the emitted listing. */
   eol: string = '\n'
 
+  /** Set while listing when a BIOS 2.x-only token byte turns up. */
+  private sawTwoX = false
+
   detokenize(buffer: Buffer): DetokenizeResult {
     const warnings: string[] = []
+    this.sawTwoX = false
     const lines: string[] = []
     let offset = 0
 
@@ -73,6 +77,12 @@ export class Detokenizer {
       offset = end + 1
     }
 
+    if (this.bios === 1 && this.sawTwoX) {
+      warnings.push(
+        `$${this.hex(tokenMax(1) + 1)}-$${this.hex(tokenMax(2))} are BIOS 2.x tokens; try --bios 2`
+      )
+    }
+
     if (lines.length === 0 && buffer.length > 2) {
       throw new BastokError(
         'no BASIC lines found; the file does not look like a tokenized program ' +
@@ -104,6 +114,10 @@ export class Detokenizer {
         continue
       }
       const keyword = keywordForToken(byte, this.bios)
+      if (byte > tokenMax(1) && byte <= tokenMax(2)) { this.sawTwoX = true }
+      if (this.bios === 2 && byte === TOK_BRK_SCREEN && this.bareStatement(buffer, i + 1, to)) {
+        warnings.push(`line ${number}: bare SCREEN; if this program is from BIOS 1.x, it was BRK`)
+      }
       if (keyword === undefined) {
         out += `{$${this.hex(byte)}}`
         warnings.push(
@@ -115,6 +129,13 @@ export class Detokenizer {
       out += keyword
     }
     return out
+  }
+
+  /** True when only spaces lie between buffer[from] and the end of the statement. */
+  private bareStatement(buffer: Buffer, from: number, to: number): boolean {
+    let i = from
+    while (i < to && buffer[i] === 0x20) { i++ }
+    return i >= to || buffer[i] === 0x3a
   }
 
   private hex(value: number, width: number = 2): string {

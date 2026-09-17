@@ -224,6 +224,9 @@ export const KEYWORDS: readonly string[] = KEYWORDS_1
 /** Highest valid BIOS 1.x token byte ($D4). */
 export const TOK_MAX = TOK_BASE + KEYWORDS_1.length - 1
 
+/** $B4: BRK on BIOS 1.x, SCREEN on BIOS 2.x. The one token whose keyword changed. */
+export const TOK_BRK_SCREEN = 0xb4
+
 /** REM ($8E, in both tables) — everything after it on a line is copied verbatim. */
 export const TOK_REM = TOK_BASE + KEYWORDS_1.indexOf('REM')
 

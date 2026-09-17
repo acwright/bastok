@@ -8,8 +8,11 @@ import {
   PROGRAM_START,
   TOKBUF_MAX,
   TOK_BASE,
+  TOK_BRK_SCREEN,
   TOK_REM,
+  keywordForToken,
   keywordsFor,
+  tokenMax,
 } from './Tokens'
 
 /** A stored program line: number plus its tokenized payload (no terminator). */
@@ -74,6 +77,7 @@ export class Tokenizer {
       if (raw[x] === ' ') { x++ }
 
       const payload = this.crunch(raw, x, sourceLine)
+      this.hint(raw, x, payload, number, sourceLine, warnings)
       this.store(lines, number, payload, sourceLine, warnings)
     })
 
@@ -103,6 +107,42 @@ export class Tokenizer {
           sourceLine
         )
       }
+    }
+  }
+
+  /**
+   * Warn when the other BIOS would crunch this line differently in a way that
+   * matters: under BIOS 1, a line that crunches to 2.x keywords (VPOKE,
+   * SCREEN...) under BIOS 2; under BIOS 2, a line whose source says BRK, which
+   * 2.x does not know. Warnings only: the bytes are the chosen BIOS's.
+   */
+  private hint(
+    raw: string,
+    x: number,
+    payload: number[],
+    number: number,
+    sourceLine: number,
+    warnings: string[]
+  ): void {
+    const other = new Tokenizer()
+    other.bios = this.bios === 1 ? 2 : 1
+    const shadow = other.crunch(raw, x, sourceLine)
+
+    if (this.bios === 1) {
+      // A 1.x line that only says BRK is ordinary 1.x source: no hint.
+      const names = new Set<string>()
+      for (const byte of shadow) {
+        if (byte === TOK_BRK_SCREEN || byte > tokenMax(1)) { names.add(keywordForToken(byte, 2)!) }
+      }
+      if (names.size === 0) { return }
+      warnings.push(
+        `source line ${sourceLine}: line ${number} crunches differently on BIOS 2.x ` +
+        `(${[...names].join(', ')}); use --bios 2 for a 2.x machine`
+      )
+    } else if (shadow.includes(TOK_BRK_SCREEN)) {
+      warnings.push(
+        `source line ${sourceLine}: line ${number}: BRK is not a keyword on BIOS 2.x`
+      )
     }
   }
 

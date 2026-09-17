@@ -18,6 +18,13 @@ function parseHex(value: string) {
   return prefixedHexString
 }
 
+function parseBios(value: string) {
+  if (value !== '1' && value !== '2') {
+    throw new InvalidArgumentError('BIOS must be 1 or 2')
+  }
+  return Number(value)
+}
+
 const program = new Command()
 program.showHelpAfterError()
 program
@@ -35,6 +42,7 @@ program
   .option('-H, --header', 'Read / write a 2-byte load address header', false)
   .option('-c, --crlf', 'Emit CRLF line endings when detokenizing', false)
   .option('-q, --quiet', 'Suppress warnings and the summary line', false)
+  .option('-b, --bios <1|2>', 'BIOS the image is for: 1 (1.x, e.g. 1.6) or 2 (2.x)', parseBios, 1)
   .option('-T, --tokens', 'Print the token table and exit', false)
   .argument('[path]', 'Path to the file to convert')
   .addHelpText('beforeAll', figlet.textSync('bastok') + '\n' + `Version: ${VERSION} | A.C. Wright Design\n`)
@@ -44,10 +52,13 @@ Examples:
   bastok game.prg                 Detokenize to game.txt
   bastok -o - game.prg            List game.prg to stdout
   bastok -t -o out.bas game.txt   Tokenize to out.bas
-  bastok --tokens                 Show the token table`)
+  bastok -b 2 game.txt            Tokenize for BIOS 2.x
+  bastok --tokens                 Show the token table
+  bastok -T -b 2                  Show the BIOS 2.x token table`)
   .parse(process.argv)
 
 const options = program.opts()
+bastok.bios = options.bios
 
 if (options.tokens) {
   console.log(bastok.tokenTable())

@@ -208,3 +208,42 @@ test('round-trips a whole program under each table', () => {
     assert.ok(image.includes(TOK_BASE + KEYWORDS_2.indexOf(keyword)), keyword)
   }
 })
+
+test('hints: BIOS 1 tokenizing warns about lines holding 2.x keywords', () => {
+  const result = bastokFor(1).tokenize('10 VPOKE 1,2\n20 PRINT "VPOKE"\n30 BRK\n40 ONSCREEN\n50 NVRAM\n')
+  assert.deepEqual(result.warnings, [
+    'source line 1: line 10 crunches differently on BIOS 2.x (VPOKE); use --bios 2 for a 2.x machine',
+    'source line 4: line 40 crunches differently on BIOS 2.x (SCREEN); use --bios 2 for a 2.x machine',
+  ])
+})
+
+test('hints: BIOS 2 tokenizing warns about BRK only', () => {
+  const result = bastokFor(2).tokenize('10 VPOKE 1,2\n20 X=1:BRK\n30 PRINT "BRK"\n40 REM BRK\n50 SCREEN 0\n')
+  assert.deepEqual(result.warnings, ['source line 2: line 20: BRK is not a keyword on BIOS 2.x'])
+})
+
+test('hints: BIOS 1 listing says to try --bios 2 once for $D5-$E3', () => {
+  const image = bastokFor(2).tokenize('10 VPOKE 1,2\n20 NVFIND 1\n').buffer
+  const { warnings } = bastokFor(1).detokenize(image)
+  assert.equal(warnings.length, 3)
+  assert.equal(warnings[2], '$D5-$E3 are BIOS 2.x tokens; try --bios 2')
+})
+
+test('hints: BIOS 2 listing flags a bare SCREEN, which was BRK on 1.x', () => {
+  const image = bastokFor(1).tokenize('10 BRK\n20 X=1:BRK :Y=2\n30 SCREEN 0\n').buffer
+  const two = bastokFor(2).detokenize(image)
+  assert.deepEqual(two.warnings, [
+    'line 10: bare SCREEN; if this program is from BIOS 1.x, it was BRK',
+    'line 20: bare SCREEN; if this program is from BIOS 1.x, it was BRK',
+  ])
+  const one = bastokFor(1).detokenize(bastokFor(1).tokenize(GUESS).buffer)
+  assert.deepEqual(one.warnings, [])
+  const clean = bastokFor(2).detokenize(bastokFor(2).tokenize(PROGRAM_2).buffer)
+  assert.deepEqual(clean.warnings, [])
+})
+
+test('hints: an ordinary 1.x program tokenizes without warnings under either table', () => {
+  assert.deepEqual(bastokFor(1).tokenize(GUESS).warnings, [])
+  assert.deepEqual(bastokFor(2).tokenize(GUESS).warnings, [])
+  assert.deepEqual(bastokFor(2).tokenize(PROGRAM_2).warnings, [])
+})
