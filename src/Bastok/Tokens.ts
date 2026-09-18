@@ -2,7 +2,7 @@
 //   T O K E N   T A B L E
 //
 //   Transcribed from KeywordTbl in 6502-BIOS/BASIC.asm, once for BIOS 1.x (tag
-//   v1.6) and once for BIOS 2.x (tag v2.0.1).  Order is significant:
+//   v1.6) and once for BIOS 2.x (tag v2.0.2).  Order is significant:
 //   the token byte is TOK_BASE + (index in this array), so reordering changes
 //   the token values. The interpreter's keyword matcher walks the whole table
 //   and takes the LONGEST match (BIOS 1.4 and later).
@@ -107,10 +107,10 @@ export const KEYWORDS_1: readonly string[] = [
 ]
 
 /**
- * BIOS 2.x keywords in table order: KeywordTbl at 6502-BIOS tag v2.0.1. The 1.x
+ * BIOS 2.x keywords in table order: KeywordTbl at 6502-BIOS tag v2.0.2. The 1.x
  * table with $B4 BRK replaced by SCREEN, plus $D5-$E3. Pinned by
  * src/test/fixtures/tokens-2.0.json, a copy of the BIOS's own
- * tests/fixtures/tokens.json at v2.0.1 — unchanged from v2.0, which is why the
+ * tests/fixtures/tokens.json at v2.0.2 — unchanged from v2.0, which is why the
  * fixture keeps its name.
  */
 export const KEYWORDS_2: readonly string[] = [

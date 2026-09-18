@@ -299,7 +299,7 @@ bastok with what the ROMs themselves crunched (next section).
 
 ### Checking against the ROMs
 
-`src/test/fixtures/rom-crunch.json` records what BIOS 1.6 and 2.0.1 do with each
+`src/test/fixtures/rom-crunch.json` records what BIOS 1.6 and 2.0.2 do with each
 program in `src/test/corpus/`: the bytes from `$0800` to `VARTAB` (what `SAVE`
 writes) and the output of `LIST`. It is captured by typing the programs into the
 emulator:
@@ -311,7 +311,7 @@ npm run capture:rom -- --check   # re-capture and fail on any difference
 
 This needs [AC6502 Emulator](https://github.com/acwright/6502-EMULATOR) 3.1.1
 installed (the `6502` command). The script boots its bundled `BIOS.bin` (1.6, on the
-TMS9918A) and `BIOS2.bin` (2.0.1, on the PICOVDP) headless, refuses any other
+TMS9918A) and `BIOS2.bin` (2.0.2, on the PICOVDP) headless, refuses any other
 emulator version or ROM hash, and also checks that `KeywordTbl` in each running
 ROM equals `tokens-1.6.json` / `tokens-2.0.json`. `--rom1`, `--rom2` and `--port`
 override the ROM files and the debug port — use them to point at ROMs built from
@@ -362,10 +362,11 @@ bastok/
   last 1.x release). `src/test/fixtures/tokens-1.6.json` pins it; it was decoded
   once from `v1.6`'s `BIOS.bin`. (`KEYWORDS` and `TOK_MAX` are the 1.x values,
   as in bastok 1.0.)
-- `KEYWORDS_2` is the table on `main`, at tag `v2.0.1`.
+- `KEYWORDS_2` is the table on `main`, at tag `v2.0.2`.
   `src/test/fixtures/tokens-2.0.json` is a copy of the BIOS's own
-  `tests/fixtures/tokens.json` at `v2.0.1`, which is byte for byte what `v2.0`
-  held: the 2.0.1 reissue is a serial fix in `Kernal.asm` only.
+  `tests/fixtures/tokens.json` at `v2.0.2`, which is byte for byte what `v2.0`
+  held: the 2.0.x point releases fix `Kernal.asm` and `BasCmdColor`, leaving
+  `KeywordTbl` where it was.
 
 Order determines the token values. If a later 2.x BIOS adds keywords: copy its
 `tests/fixtures/tokens.json` over `tokens-2.0.json` (and update the hash in

@@ -6,18 +6,18 @@
 //   find the table by its first bytes "EN" $C4 "FO" $D2 (END, FOR), then read
 //   keywords up to the $00 terminator, bit 7 ending each one; keys "$80".. in
 //   order, JSON with a two-space indent and a trailing newline. The same decode
-//   of v2.0.1's BIOS.bin reproduces v2.0.1's tests/fixtures/tokens.json byte for
+//   of v2.0.2's BIOS.bin reproduces v2.0.2's tests/fixtures/tokens.json byte for
 //   byte. Generated once; never regenerate it from Tokens.ts.
 //
-// tokens-2.0.json: a byte-identical copy of 6502-BIOS v2.0.1:tests/fixtures/tokens.json
-//   (commit 62254c130955caa76af08d2f9bf29abf3adde980), sha256
+// tokens-2.0.json: a byte-identical copy of 6502-BIOS v2.0.2:tests/fixtures/tokens.json
+//   (commit bd476a890656736cf16ccb9b2b7d2d2be3f60e79), sha256
 //   d7e569a6a0bbf8d31d0de38d94c5003e358258b1554e445e5aca7e6b688add61. Its
 //   BIOS.bin has sha256
-//   f5fb454b9f407c9cbb4cb349ac833b7c92400122d44b6a5840ebe6ab9cf0d97b.
+//   7a71252daa7f341a7c6ac8ff7015a0481bf003ace99b0cb0c1e575a7e1f1d70e.
 //
-// Both tags were reissued for the serial flow-control fixes, which touch only
-// Kernal.asm: BASIC.asm and so KeywordTbl are unchanged, and the name stays
-// tokens-2.0.json because the 2.x table is still BIOS 2.0's.
+// The 2.x point releases so far are fixes to Kernal.asm and to BasCmdColor:
+// KeywordTbl is unchanged, still at $EFFA and still 100 keywords, so the fixture
+// is byte for byte what v2.0 held and keeps the name tokens-2.0.json.
 
 import { strict as assert } from 'assert'
 import { createHash } from 'crypto'

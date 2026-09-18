@@ -49,10 +49,10 @@ const BIOSES = {
     tokens: 'tokens-1.6.json',
   },
   2: {
-    bios: 'v2.0.1',
+    bios: 'v2.0.2',
     vdp: 'picovdp',
     romName: 'BIOS2.bin',
-    sha256: 'f5fb454b9f407c9cbb4cb349ac833b7c92400122d44b6a5840ebe6ab9cf0d97b',
+    sha256: '7a71252daa7f341a7c6ac8ff7015a0481bf003ace99b0cb0c1e575a7e1f1d70e',
     banner: /AC6502 BIOS v2\.0/,
     tokens: 'tokens-2.0.json',
   },
